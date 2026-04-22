@@ -1,169 +1,131 @@
-# 🤖 Binance Futures Testnet Trading Bot
+# Binance Futures Testnet Trading Bot
 
-A clean, well-structured Python CLI trading bot that places **Market**, **Limit**, and **Stop-Limit** orders on **Binance USDT-M Futures Testnet**.
+I built this focused CLI tool to place orders on Binance USDT-M Futures Testnet. The goal was not to build "just another script". It was to show clean architecture, proper error handling, and a good developer experience for anyone running it.
 
----
+It supports **Market, Limit, and Stop-Limit** orders, and comes with both a direct command mode and a guided interactive mode.
 
-## 📁 Project Structure
+### Why Testnet?
+No real money, same API behavior. Perfect for demonstrating logic safely.
+
+## What it can do
+
+- Place MARKET orders instantly
+- Place LIMIT orders with time-in-force options
+- Place STOP orders (Stop-Limit, not Stop-Market)
+- Check your futures account balance
+- Run in interactive mode with menus and validation
+- Log everything to rotating files for debugging
+
+## Project structure
+
+I kept it modular so each piece has one job:
 
 ```
 trading_bot/
 ├── bot/
-│   ├── __init__.py
-│   ├── client.py          # Binance API client wrapper
-│   ├── orders.py          # Order placement logic + OrderResult
-│   ├── validators.py      # Input validation
-│   └── logging_config.py  # Rotating file + console logging
-├── logs/                  # Auto-created; daily rotating log files
-├── cli.py                 # CLI entry point (Typer + Rich + questionary)
-├── .env.example           # Template for API credentials
+│   ├── client.py          # Wraps python-binance, handles testnet connection
+│   ├── orders.py          # Builds and places orders, returns a clean OrderResult
+│   ├── validators.py      # Validates symbol, side, qty, price before hitting API
+│   └── logging_config.py  # Sets up console + rotating file logs
+├── logs/                  # Created automatically
+├── cli.py                 # The Typer CLI, direct and interactive modes live here
+├── .env.example
 ├── requirements.txt
 └── README.md
 ```
 
----
+## Setup, takes about 3 minutes
 
-## ⚙️ Setup
-
-### 1. Clone / unzip the project
-
+**1. Get the code**
 ```bash
 cd trading_bot
 ```
 
-### 2. Create a virtual environment
-
+**2. Create a venv**
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate        # macOS / Linux
-# .venv\Scripts\activate         # Windows
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 ```
 
-### 3. Install dependencies
-
+**3. Install**
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Get Binance Futures Testnet API keys
+**4. Get Testnet keys**
+1. Go to https://testnet.binancefuture.com
+2. Sign in with GitHub
+3. Open the API Key tab and click Generate Key
+4. Copy the key and secret. The secret is shown only once.
 
-1. Visit [https://testnet.binancefuture.com](https://testnet.binancefuture.com)
-2. Click **"Sign In"** → authenticate with GitHub or Gmail
-3. Once logged in, go to the **"API Key"** tab (top menu)
-4. Click **"Generate Key"** — your API Key and Secret will appear
-5. Copy both values (the secret is shown **only once**)
-
-### 5. Configure credentials
-
+**5. Add your keys**
 ```bash
 cp .env.example .env
 ```
-
-Edit `.env`:
-
-```env
-BINANCE_API_KEY=your_actual_api_key
-BINANCE_API_SECRET=your_actual_api_secret
+Then edit `.env`:
+```
+BINANCE_API_KEY=your_key_here
+BINANCE_API_SECRET=your_secret_here
 ```
 
----
+That's it.
 
-## 🚀 How to Run
+## How to use it
 
-### Direct (non-interactive) mode
-
-**Place a MARKET order:**
+### 1. Direct mode, great for scripts
 ```bash
+# Market buy 0.001 BTC
 python cli.py place --symbol BTCUSDT --side BUY --type MARKET --quantity 0.001
-```
 
-**Place a LIMIT order:**
-```bash
+# Limit sell at 80k
 python cli.py place --symbol BTCUSDT --side SELL --type LIMIT --quantity 0.001 --price 80000
-```
 
-**Place a STOP (Stop-Limit) order:** *(bonus)*
-```bash
-python cli.py place --symbol BTCUSDT --side BUY --type STOP \
-  --quantity 0.001 --price 82000 --stop-price 81500
-```
+# Stop-Limit buy: trigger at 81,500, limit at 82,000
+python cli.py place --symbol BTCUSDT --side BUY --type STOP --quantity 0.001 --price 82000 --stop-price 81500
 
-**Check account balances:**
-```bash
+# Check balance
 python cli.py account
 ```
 
-### Interactive (guided) mode *(bonus)*
-
+### 2. Interactive mode, my favorite for demos
 ```bash
 python cli.py interactive
 ```
+It walks you through symbol, side, type, quantity, and price with dropdowns, validates each input, and shows a confirmation table before submitting. No typos, no surprises.
 
-Walks you through symbol → side → type → quantity → price with
-selection menus, validation, and a confirmation prompt before submitting.
+## CLI options
 
-### Help
-
-```bash
-python cli.py --help
-python cli.py place --help
-```
-
----
-
-## 📋 CLI Options Reference
-
-| Option | Short | Required | Description |
+| Flag | Short | Needed for | What it does |
 |---|---|---|---|
-| `--symbol` | `-s` | ✅ | Trading pair (e.g. `BTCUSDT`) |
-| `--side` | | ✅ | `BUY` or `SELL` |
-| `--type` | `-t` | ✅ | `MARKET`, `LIMIT`, or `STOP` |
-| `--quantity` | `-q` | ✅ | Order size |
-| `--price` | `-p` | LIMIT / STOP | Limit price in USDT |
-| `--stop-price` | | STOP only | Trigger price in USDT |
-| `--tif` | | optional | Time-in-force: `GTC` (default) / `IOC` / `FOK` |
+| `--symbol` | `-s` | always | e.g., BTCUSDT |
+| `--side` |  | always | BUY or SELL |
+| `--type` | `-t` | always | MARKET, LIMIT, STOP |
+| `--quantity` | `-q` | always | Order size |
+| `--price` | `-p` | LIMIT, STOP | Your limit price |
+| `--stop-price` |  | STOP only | Trigger price |
+| `--tif` |  | optional | GTC, IOC, or FOK (defaults to GTC) |
 
----
+## Logging
 
-## 📜 Logging
+I did not want to clutter the terminal, so:
 
-All API requests, responses, and errors are logged to:
+- Console shows warnings and errors only
+- `logs/trading_bot_YYYYMMDD.log` captures everything at DEBUG level, including full request params and raw API responses
+- Logs rotate at 10MB and keep the last 7 files
 
-```
-logs/trading_bot_YYYYMMDD.log
-```
+If something fails on Binance's side, you can open the log and see exactly what was sent.
 
-- **File**: `DEBUG` and above — full request params, raw response payloads, errors with tracebacks
-- **Console**: `WARNING` and above — keeps the terminal clean
-- Log files rotate at **10 MB**, keeping the last **7 files**
+## Tech choices
 
----
+- **python-binance**: official wrapper, supports `testnet=True` out of the box
+- **Typer + Rich + questionary**: fast CLI building, beautiful tables, and safe interactive prompts
+- **python-dotenv**: keeps secrets out of code
+- **Validators**: I validate locally first to fail fast, then let Binance enforce LOT_SIZE and PRICE_FILTER rules
 
-## 🧱 Assumptions
+## What I'd improve next
 
-- Uses `python-binance` with `testnet=True`, which automatically points to `https://testnet.binancefuture.com`
-- Quantities and prices must satisfy Binance Futures symbol filters (`LOT_SIZE`, `PRICE_FILTER`). Invalid values will be rejected by the API with a clear error message.
-- STOP orders use Binance Futures type `STOP` (Stop-Limit), not `STOP_MARKET`.
-- Credentials are read from a `.env` file via `python-dotenv`.
-
----
-
-## 🎁 Bonus Features Implemented
-
-| Feature | Details |
-|---|---|
-| **Stop-Limit orders** | `--type STOP` with `--price` and `--stop-price` |
-| **Interactive CLI** | `python cli.py interactive` — guided menus + confirmation prompt |
-| **Rich UI output** | Colour-coded tables for request summary and order response |
-
----
-
-## 📦 Dependencies
-
-| Package | Purpose |
-|---|---|
-| `python-binance` | Binance REST API client |
-| `python-dotenv` | Load `.env` credentials |
-| `typer[all]` | CLI framework |
-| `rich` | Terminal formatting |
-| `questionary` | Interactive prompts / select menus |
+If this were going to production, I'd add:
+1. Websocket stream for order status updates
+2. A simple backtesting layer using historical klines
+3. Unit tests for validators with pytest
+4. Docker file for one-command setup
