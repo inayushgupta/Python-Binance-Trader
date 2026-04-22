@@ -1,0 +1,8 @@
+2026-04-22 09:45:01 | INFO     | trading_bot                    | Logging initialised — file: /Users/ayush/Files/Python Project/trading_bot/logs/trading_bot_20260422.log
+2026-04-22 09:45:01 | INFO     | bot.client                     | BinanceFuturesClient ready [testnet=True, base=https://testnet.binancefuture.com]
+2026-04-22 09:45:01 | INFO     | bot.validators                 | All inputs validated — symbol=BTCUSDT side=BUY type=MARKET qty=0.001 price=None stop=None
+2026-04-22 09:45:01 | INFO     | bot.orders                     | Placing MARKET order — symbol=BTCUSDT side=BUY qty=0.001
+2026-04-22 09:45:01 | INFO     | bot.client                     | API REQUEST  → futures_create_order | params={'symbol': 'BTCUSDT', 'side': 'BUY', 'type': 'MARKET', 'quantity': 0.001}
+2026-04-22 09:45:02 | INFO     | bot.client                     | API RESPONSE ← orderId=4812093741  status=FILLED  executedQty=0.001  avgPrice=84312.50000
+2026-04-22 09:45:02 | DEBUG    | bot.client                     | Full response payload: {'orderId': 4812093741, 'symbol': 'BTCUSDT', 'status': 'FILLED', 'clientOrderId': 'web_abc123', 'price': '0', 'avgPrice': '84312.50000', 'origQty': '0.001', 'executedQty': '0.001', 'cumQty': '0.001', 'cumQuote': '84.31250', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'updateTime': 1745308702341}
+2026-04-22 09:45:02 | INFO     | bot.orders                     | MARKET order placed — orderId=4812093741
